@@ -23,17 +23,16 @@ ElapseTime _clampTimer, _separartorDefendTimer;
 
 void intakeBegin()
 {
-    separatorMotor.setMaxPower(SEPARATOR_MAX_POWER);
-
     brushServoLeft.write(90);
     brushServoRight.write(90);
 
-    brushMotor.setPower(0.0);
+    brushMotor.setDirection(REVERSE);
+    brushMotor.writePower(0.0f);
 }
 
 void intakeStart()
 {
-    separatorMotor.resetEncoder();
+    separatorMotor.writeResetEncoder();
     clampServo.write(CLAMP_SERVO_CALMP_POS);
     _separatorRegulator.start();
     _clampTimer.reset();
@@ -41,7 +40,7 @@ void intakeStart()
 
     brushServoLeft.write(90 + BRUSH_SERVO_SPEED);
     brushServoRight.write(90 - BRUSH_SERVO_SPEED);
-    brushMotor.setPower(BRUSH_MOTOR_POWER);
+    brushMotor.writePower(BRUSH_MOTOR_POWER);
 }
 
 void updateColorSensors()
@@ -79,22 +78,22 @@ void intakeUpdate()
 {
     updateColorSensors();
 
-    int32_t separatorErr = _targetSeparatorPos - separatorMotor.getCurrentPosition();
+    int32_t separatorErr = _targetSeparatorPos - separatorMotor.readCurrentPosition();
 
     if (abs(separatorErr) > SEPARATOR_SENS)
     {
-        separatorMotor.setPower(_separatorRegulator.update(separatorErr));
+        separatorMotor.writeVoltadge(max(min(SEPARATOR_MAX_VOLTADGE, _separatorRegulator.update(separatorErr)), -SEPARATOR_MAX_VOLTADGE));
 
-        if (_separartorDefendTimer.seconds() > BRUSH_DEFEND_TIMER)
-        {
-            _targetSeparatorPos -= sgn(separatorErr) * SEPARATOR_MOTOR_STEP;
-            _separartorDefendTimer.reset();
-        }
+        // if (_separartorDefendTimer.seconds() > BRUSH_DEFEND_TIMER)
+        // {
+        //     _targetSeparatorPos -= sgn(separatorErr) * SEPARATOR_MOTOR_STEP;
+        //     _separartorDefendTimer.reset();
+        // }
     }
     else
     {
         _separartorDefendTimer.reset();
-        separatorMotor.setPower(0.0f);
+        separatorMotor.writePower(0.0f);
     }
 
     if (abs(separatorErr) < SEPARATOR_SENS && puckColor != WHITE)

@@ -2,10 +2,10 @@
 
 #include <Arduino.h>
 #include <Wire.h>
-#include <SoftWire.h>
+#include <SoftwareWire.h>
 
 #define DEFAULT_HARD_WIRE_TIMEOUT 4
-#define DEFAULT_SOFT_WIRE_TIMEOUT 6
+#define DEFAULT_SOFT_WIRE_TIMEOUT 10
 
 class IWire
 {
@@ -90,14 +90,14 @@ public:
     }
 };
 
-class SoftwareWire : public IWire
+class SoftWire : public IWire
 {
-    SoftWire *_softWire;
+    SoftwareWire *_softWire;
 
 public:
-    SoftwareWire(uint8_t sda, uint8_t scl)
+    SoftWire(uint8_t sda, uint8_t scl)
     {
-        _softWire = new SoftWire(sda, scl);
+        _softWire = new SoftwareWire(sda, scl);
     }
 
     void setTimeout(uint32_t timeout){

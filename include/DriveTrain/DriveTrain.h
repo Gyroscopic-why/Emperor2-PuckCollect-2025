@@ -14,30 +14,32 @@ void driveTrainBegin()
 
     _trajectory.enqueue(new DriveForwardToTheLimit(MainPDregulator, ETALON_DISTANCE));
 
-    if (IS_GYRO)
-        _trajectory.enqueue(new TurnByGlobalCoordinates(MainPDregulator, 90));
+    // _trajectory.enqueue(new DriveForwardToTheLimit(MainPDregulator, ETALON_DISTANCE));
 
-    for (int step = 1; step < 4; step++)
-    { // три круга
-        for (int actions = 1; actions < 5; actions++)
-        { // в каждом круге полный проезд, из четырех проездов по стене, и четырех поворотов
-            _trajectory.enqueue(new DrivingAlongTheWall(MainPDregulator, ETALON_DISTANCE * step));
+    // if (IS_GYRO)
+    //     _trajectory.enqueue(new TurnByGlobalCoordinates(MainPDregulator, 90));
 
-            if (IS_GYRO)
-                _trajectory.enqueue(new TurnByGlobalCoordinates(MainPDregulator, chopDegrees(90 + 90 * actions)));
-            else
-                _trajectory.enqueue(new TurnToTheWall(MainPDregulator, ETALON_DISTANCE * step));
-        }
-    }
+    // for (int step = 1; step < 4; step++)
+    // { // три круга
+    //     for (int actions = 1; actions < 5; actions++)
+    //     { // в каждом круге полный проезд, из четырех проездов по стене, и четырех поворотов
+    //         _trajectory.enqueue(new DrivingAlongTheWall(MainPDregulator, ETALON_DISTANCE * step));
 
-    if (IS_GYRO)
-    {
-        _trajectory.enqueue(new TurnByGlobalCoordinates(MainPDregulator, -90));
-        _trajectory.enqueue(new DriveForwardToTheLimit(MainPDregulator, ETALON_DISTANCE));
-        _trajectory.enqueue(new TurnByGlobalCoordinates(MainPDregulator, -180));
-        _trajectory.enqueue(new DriveForwardToTheLimit(MainPDregulator, ETALON_DISTANCE));
-        _trajectory.enqueue(new TurnByGlobalCoordinates(MainPDregulator, 0));
-    }
+    //         if (IS_GYRO)
+    //             _trajectory.enqueue(new TurnByGlobalCoordinates(MainPDregulator, chopDegrees(90 + 90 * actions)));
+    //         else
+    //             _trajectory.enqueue(new TurnToTheWall(MainPDregulator, ETALON_DISTANCE * step));
+    //     }
+    // }
+
+    // if (IS_GYRO)
+    // {
+    //     _trajectory.enqueue(new TurnByGlobalCoordinates(MainPDregulator, -90));
+    //     _trajectory.enqueue(new DriveForwardToTheLimit(MainPDregulator, ETALON_DISTANCE));
+    //     _trajectory.enqueue(new TurnByGlobalCoordinates(MainPDregulator, -180));
+    //     _trajectory.enqueue(new DriveForwardToTheLimit(MainPDregulator, ETALON_DISTANCE));
+    //     _trajectory.enqueue(new TurnByGlobalCoordinates(MainPDregulator, 0));
+    // }
     // остается только дописать генерацию рандомной езды (опционально), или есть идея интереснее, но ее позже расскажу
 }
 

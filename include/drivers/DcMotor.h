@@ -10,6 +10,7 @@
 #define EXPANSION_RESET 0x27
 #define EXPANSION_ENABLE 0x25
 #define EXPANSION_RESET_TIME 1000
+#define EXPANSION_GET_VOLTADGE 0x53
 
 #define REQUEST_MOTOR_CURRENT_C1 0x54
 #define REQUEST_MOTOR_CURRENT_C2 0x55
@@ -19,6 +20,8 @@
 
 #define MOTOR_POSITION_RESET_C1 0x4C
 #define MOTOR_POSITION_RESET_C2 0x4D
+
+#define MOTOR_DELAY 1
 
 enum ZeroPowerBehavior
 {
@@ -60,7 +63,8 @@ public:
         if (_enabled)
             return;
 
-        while (millis() - _resetTime < EXPANSION_RESET_TIME);
+        while (millis() - _resetTime < EXPANSION_RESET_TIME)
+            ;
 
         wire->write8(address, EXPANSION_ENABLE);
 
@@ -71,10 +75,23 @@ public:
     {
         return _enabled;
     }
+
+    float readVoltadge()
+    {
+        wire->write8(address, EXPANSION_GET_VOLTADGE);
+
+        wire->requestFrom(address, 2);
+
+        byte b1 = wire->read();
+        byte b2 = wire->read();
+
+        return (b1 * 256 + b2) / 100.0f;
+    }
 };
 
 class DcMotor
 {
+private:
     DcExpansion *_expansion;
 
     uint8_t _channel;
@@ -88,7 +105,7 @@ class DcMotor
 
     int32_t _encoderResetPos = 0;
 
-    int32_t getRawCurrentPosition()
+    int32_t readRawCurrentPosition()
     {
         _expansion->wire->write8(_expansion->address, _channel == 1 ? REQUEST_MOTOR_POSITION_C1 : REQUEST_MOTOR_POSITION_C2);
 
@@ -119,34 +136,30 @@ public:
         if (!_expansion->isEnabled())
             _expansion->enable();
 
-        resetEncoder();
+        writeResetEncoder();
     }
 
-    void setMaxPower(float maxPower){
+    void setMaxPower(float maxPower)
+    {
         _maxPower = maxPower;
-        
-        setPower(_lastFloatPower);
     }
 
     void setZeroPowerBehavior(bool behavior)
     {
         _zeroPowerBehavior = behavior;
-        
-        setPower(_lastFloatPower);
     }
 
     void setDirection(bool direction)
     {
         _direction = direction;
-
-        setPower(_lastFloatPower);
     }
 
-    float getPower(){
+    float getPower()
+    {
         return _lastFloatPower;
     }
 
-    void setPower(float power)
+    void writePower(float power)
     {
         _lastFloatPower = power;
 
@@ -162,10 +175,12 @@ public:
             _lastPower = intPower;
 
             _expansion->wire->write2x8(_expansion->address, _channel == 1 ? MOTOR_SET_POWER_C1 : MOTOR_SET_POWER_C2, (uint8_t)intPower);
+
+            delay(MOTOR_DELAY);
         }
     }
 
-    float getCurrent()
+    float readCurrent()
     {
         _expansion->wire->write8(_expansion->address, _channel == 1 ? REQUEST_MOTOR_CURRENT_C1 : REQUEST_MOTOR_CURRENT_C2);
 
@@ -176,18 +191,27 @@ public:
         return ((int16_t)(buf[0] * 256 + buf[1]) * (_direction ? -1 : 1)) / 1000.0f;
     }
 
-    int32_t getCurrentPosition(){
-        return getRawCurrentPosition() - _encoderResetPos;
+    int32_t readCurrentPosition()
+    {
+        return readRawCurrentPosition() - _encoderResetPos;
     }
 
-    void resetEncoder()
+    void writeResetEncoder()
     {
         _expansion->wire->write8(_expansion->address, _channel == 1 ? MOTOR_POSITION_RESET_C1 : MOTOR_POSITION_RESET_C2);
+
+        delay(MOTOR_DELAY);
 
         _encoderResetPos = 0;
     }
 
-    void softwareEncoderReset(){
-        _encoderResetPos = getRawCurrentPosition();
+    void softwareEncoderReset()
+    {
+        _encoderResetPos = readRawCurrentPosition();
+    }
+
+    void writeVoltadge(float voltadge)
+    {
+        writePower(voltadge / _expansion->readVoltadge());
     }
 };

@@ -35,9 +35,9 @@ public:
 
     bool Execute() override
     { // энкодеры сбрасываются, все норм. ПД тоже сбрасывается
-        if (forwardDistanceSensor.getValue() > _distance)
+        if (forwardDistanceFilter.getCurrentValue() > _distance)
         {
-            Drive(ROBOT_SPEED, PDreg->update(rightMotor.getCurrentPosition() - leftMotor.getCurrentPosition()));
+            Drive(forward, PDreg->update(rightMotor.readCurrentPosition() - leftMotor.readCurrentPosition()));
             return false;
         }
 
@@ -59,9 +59,9 @@ public:
 
     bool Execute() override
     {
-        if (forwardDistanceSensor.getValue() < _distance)
+        if (forwardDistanceFilter.getCurrentValue() < _distance)
         {
-            Drive(0.0f, -ROBOT_SPEED);
+            Drive(stop, -ROBOT_SPEED);
             return false;
         }
 
@@ -83,10 +83,10 @@ public:
 
     bool Execute() override
     {
-        if (forwardDistanceSensor.getValue() > _distance)
+        if (forwardDistanceFilter.getCurrentValue() > _distance)
         {
-            float errValue = rightDistanceSensor.getValue() - _distance;
-            Drive(ROBOT_SPEED, PDreg->update(errValue));
+            float errValue = rightDistanceFilter.getCurrentValue() - _distance;
+            Drive(forward, PDreg->update(errValue));
             return false;
         }
 
@@ -108,9 +108,9 @@ public:
 
     bool Execute() override
     {
-        if (((leftMotor.getCurrentPosition() + rightMotor.getCurrentPosition()) / 2) > _encPos)
+        if (((leftMotor.readCurrentPosition() + rightMotor.readCurrentPosition()) / 2) > _encPos)
         {
-            Drive(-ROBOT_SPEED, PDreg->update(rightMotor.getCurrentPosition() - leftMotor.getCurrentPosition()));
+            Drive(backward, PDreg->update(rightMotor.readCurrentPosition() - leftMotor.readCurrentPosition()));
             return false;
         }
 
@@ -139,7 +139,7 @@ public:
 
         if (abs(error) > ANGLE_ERROR)
         {
-            Drive(0.0f, ROBOT_SPEED * sgn(error));
+            Drive(stop, ROBOT_SPEED * sgn(error));
             return false;
         }
 
@@ -177,7 +177,7 @@ public:
 
             if (abs(error) > ANGLE_ERROR)
             {
-                Drive(0.0f, ROBOT_SPEED * sgn(error));
+                Drive(stop, ROBOT_SPEED * sgn(error));
                 return false;
             }
 
@@ -185,11 +185,11 @@ public:
         }
         else
         {
-            float error = chopDegrees(_targetTurn - chopDegrees(((leftMotor.getCurrentPosition() - rightMotor.getCurrentPosition()) / SINGLE_ENCODER_STEP * WHEEL_DISTANCE) / (90 * WHEEL_DISTANCE)));
+            float error = chopDegrees(_targetTurn - chopDegrees(((leftMotor.readCurrentPosition() - rightMotor.readCurrentPosition()) / SINGLE_ENCODER_STEP * WHEEL_DISTANCE) / (90 * WHEEL_DISTANCE)));
 
             if (abs(error) > ANGLE_ERROR)
             {
-                Drive(0.0f, ROBOT_SPEED * sgn(error));
+                Drive(stop, ROBOT_SPEED * sgn(error));
                 return false;
             }
 

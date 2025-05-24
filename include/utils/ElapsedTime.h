@@ -8,7 +8,7 @@ private:
     
 public:
     ElapseTime(){
-        _resetMicros = micros();
+        reset();
     }
 
     void reset(){

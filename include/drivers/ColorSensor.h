@@ -48,9 +48,9 @@
 
 struct Color
 {
-    uint16_t r, g, b, c;
+    int16_t r, g, b, c;
 
-    Color(uint16_t r, uint16_t g, uint16_t b, uint16_t c = 0)
+    Color(int16_t r, int16_t g, int16_t b, int16_t c = 0)
     {
         this->r = r;
         this->g = g;

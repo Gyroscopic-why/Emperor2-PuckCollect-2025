@@ -2,40 +2,34 @@
 #include "Devices.h"
 #include "Configs.h"
 // #include "DriveTrain/DriveTrain.h"
-// #include "Intake.h"
+#include "Intake.h"
 
 void setup() {
   Serial.begin(115200);
 
   devicesBegin();
 
-  // while (!startButton.readState());
-  // while (startButton.readState());
+  startButton.setReversed(true);
+
+  while (!startButton.readState());
+  while (startButton.readState());
   
-  // intakeBegin();
+  // driveTrainBegin();
+  intakeBegin();
   // detectFloor();
 
-  // driveTrainBegin();
+  delay(1000);
   
-  // while (!startButton.readState());
-  // while (startButton.readState());
+  while (!startButton.readState());
+  while (startButton.readState());
 
-  // intakeStart();
+  intakeStart();
   // driveTrainStart();
 }
 
 void loop() {
   devicesUpdate();
 
-  delay(15);
-
-  Serial.print("forward = ");
-  Serial.print(forwardDistanceFilter.getCurrentValue());
-  Serial.print("  left = ");
-  Serial.print(leftDistanceFilter.getCurrentValue());
-  Serial.print("  right = ");
-  Serial.println(rightDistanceFilter.getCurrentValue());
-
   // driveTrainUpdate();
-  // intakeUpdate();
+  intakeUpdate();
 }
